@@ -1,9 +1,10 @@
-package ru.netology.Test;
+package ru.netology.test;
+import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
 import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.Keys;
-import ru.netology.Data.DataGenerator;
+import ru.netology.data.DataGenerator;
 
 
 import java.time.Duration;
@@ -18,8 +19,17 @@ class TestDelivery {
     private final int daysToAddForFirstMeeting = 4;
     private final String firstMeetingDate = DataGenerator.generateDate(daysToAddForFirstMeeting);
 
+    @BeforeAll
+    static void setUpAll() {
+        SelenideLogger.addListener("allure", new AllureSelenide());
+    }
+
+    @AfterAll
+    static void tearDownAll() {
+        SelenideLogger.removeListener("allure");
+    }
     @BeforeEach
-    void setup() {
+    void setUp() {
         open("http://localhost:9999");
     }
 
@@ -52,6 +62,20 @@ class TestDelivery {
         $("[data-test-id='success-notification'] .notification__content")
                 .shouldHave(exactText("Встреча успешно запланирована на " + secondMeetingDate))
                 .shouldBe(visible);
+    }
+
+    @Test
+    @DisplayName("Should get error message if entered wrong phone number")
+    void shouldGetErrorIfWrongPhone() {
+        $("[data-test-id=city] input").setValue(validUser.getCity());
+        $("[data-test-id=date] input").sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        $("[data-test-id=date] input").setValue(firstMeetingDate);
+        $("[data-test-id=name] input").setValue(validUser.getName());
+        $("[data-test-id=phone] input").setValue(DataGenerator.generateWrongPhone("en"));
+        $("[data-test-id=agreement]").click();
+        $(byText("Запланировать")).click();
+        $("[data-test-id=phone].input_invalid .input__sub").shouldHave(exactText("Неверный формат номера мобильного телефона"));
+
     }
 }
 

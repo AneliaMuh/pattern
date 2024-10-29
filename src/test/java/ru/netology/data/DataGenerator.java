@@ -1,9 +1,7 @@
-package ru.netology.Data;
+package ru.netology.data;
 
 import com.github.javafaker.Faker;
-import io.qameta.allure.Step;
 import lombok.Value;
-import lombok.val;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -46,7 +44,7 @@ public class DataGenerator {
 
     public static String generateWrongPhone(String locale) {
         var faker = new Faker(new Locale(locale));
-        return faker.phoneNumber().phoneNumber();
+        return faker.numerify("####");
     }
 
     public static class Registration {
